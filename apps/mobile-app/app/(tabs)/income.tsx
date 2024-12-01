@@ -6,17 +6,18 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
-  TouchableWithoutFeedback,
-  Keyboard, // Import Keyboard for dismissing
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { Colors } from '@/constants/Colors';
 
 export default function IncomeScreen() {
   const [monthlyIncome, setMonthlyIncome] = useState<string | null>(null);
+  const { theme } = useColorScheme();
 
-  // Load monthly income from AsyncStorage when the screen loads
   useEffect(() => {
     const loadMonthlyIncome = async () => {
       const storedIncome = await AsyncStorage.getItem('monthlyIncome');
@@ -27,37 +28,49 @@ export default function IncomeScreen() {
     loadMonthlyIncome();
   }, []);
 
-  // Save the monthly income to AsyncStorage
   const saveMonthlyIncome = async () => {
     if (monthlyIncome) {
       await AsyncStorage.setItem('monthlyIncome', monthlyIncome);
       Alert.alert('Success', 'Monthly income updated successfully!');
-      Keyboard.dismiss(); // Dismiss the keyboard after saving
+      Keyboard.dismiss();
     } else {
       Alert.alert('Error', 'Please enter a valid income.');
     }
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      {/* Close keyboard when touching outside */}
-      <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'} // Avoid covering input with keyboard
+    <KeyboardAvoidingView
+      style={[styles.container, { backgroundColor: Colors[theme].background }]}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <Text style={[styles.title, { color: Colors[theme].text }]}>
+        What's your Income?
+      </Text>
+      <TextInput
+        placeholder="Monthly Income"
+        placeholderTextColor={Colors[theme].inputBorder}
+        value={monthlyIncome ?? ''}
+        onChangeText={setMonthlyIncome}
+        keyboardType="numeric"
+        style={[
+          styles.input,
+          { borderColor: Colors[theme].inputBorder, color: Colors[theme].text },
+        ]}
+      />
+      <TouchableOpacity
+        style={[
+          styles.saveButton,
+          { backgroundColor: Colors[theme].buttonBackground },
+        ]}
+        onPress={saveMonthlyIncome}
       >
-        <Text style={styles.title}>What's your Income?</Text>
-        <TextInput
-          placeholder="Monthly Income"
-          value={monthlyIncome ?? ''}
-          onChangeText={setMonthlyIncome}
-          keyboardType="numeric"
-          style={styles.input}
-        />
-        <TouchableOpacity style={styles.saveButton} onPress={saveMonthlyIncome}>
-          <Text style={styles.saveButtonText}>Save Income</Text>
-        </TouchableOpacity>
-      </KeyboardAvoidingView>
-    </TouchableWithoutFeedback>
+        <Text
+          style={[styles.saveButtonText, { color: Colors[theme].buttonText }]}
+        >
+          Save Income
+        </Text>
+      </TouchableOpacity>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -75,19 +88,16 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
     padding: 10,
     marginBottom: 20,
     borderRadius: 5,
   },
   saveButton: {
-    backgroundColor: '#007AFF',
     padding: 15,
     borderRadius: 5,
     alignItems: 'center',
   },
   saveButtonText: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
   },
