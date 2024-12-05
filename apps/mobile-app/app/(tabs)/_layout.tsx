@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { TabBarIcon } from '@/components/navigation/TabBarIcon'; // Reusable icon component
+import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
@@ -10,12 +10,12 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[theme ?? 'light'].tint, // Use 'theme' here
-        headerShown: false, // This hides the header for a more streamlined look
+        tabBarActiveTintColor: Colors[theme].tint,
+        headerShown: false,
       }}
     >
       <Tabs.Screen
-        name="index" // This is the home screen
+        name="index"
         options={{
           title: 'Home',
           tabBarIcon: ({ color, focused }) => (
@@ -32,7 +32,7 @@ export default function TabLayout() {
           title: 'Income',
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
-              name={focused ? 'wallet' : 'wallet-outline'} // Updated icon for income
+              name={focused ? 'wallet' : 'wallet-outline'}
               color={color}
             />
           ),

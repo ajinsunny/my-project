@@ -1,20 +1,21 @@
 import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
+  DarkTheme as NavigationDarkTheme,
+  DefaultTheme as NavigationDefaultTheme,
+  ThemeProvider as NavigationThemeProvider,
 } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import { View, StyleSheet, Switch } from 'react-native';
+
+import { AppThemeProvider } from '@/contexts/ThemeContext';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const { theme, toggleTheme } = useColorScheme(); // Destructure the toggleTheme function
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
@@ -30,18 +31,30 @@ export default function RootLayout() {
   }
 
   return (
+    <AppThemeProvider>
+      <RootLayoutWithTheme />
+    </AppThemeProvider>
+  );
+}
+
+function RootLayoutWithTheme() {
+  const { theme, toggleTheme } = useColorScheme();
+
+  return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemeProvider value={theme === 'dark' ? DarkTheme : DefaultTheme}>
+      <NavigationThemeProvider
+        value={theme === 'dark' ? NavigationDarkTheme : NavigationDefaultTheme}
+      >
         <Stack
           screenOptions={{
-            headerShown: true, // Make sure the header is visible
+            headerShown: true,
             headerRight: () => (
               <View style={styles.toggleButton}>
                 <Switch
                   value={theme === 'dark'}
                   onValueChange={toggleTheme}
-                  thumbColor={theme === 'dark' ? '#f5dd4b' : '#f4f3f4'} // Thumb color
-                  trackColor={{ false: '#767577', true: '#81b0ff' }} // Track color
+                  thumbColor={theme === 'dark' ? '#f5dd4b' : '#f4f3f4'}
+                  trackColor={{ false: '#767577', true: '#81b0ff' }}
                 />
               </View>
             ),
@@ -50,7 +63,7 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" options={{ headerShown: true }} />
           <Stack.Screen name="+not-found" />
         </Stack>
-      </ThemeProvider>
+      </NavigationThemeProvider>
     </GestureHandlerRootView>
   );
 }
