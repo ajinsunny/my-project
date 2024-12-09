@@ -11,7 +11,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { View, StyleSheet, Switch } from 'react-native';
 
 import { AppThemeProvider } from '@/contexts/ThemeContext';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { useColorScheme } from 'react-native';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -38,28 +38,15 @@ export default function RootLayout() {
 }
 
 function RootLayoutWithTheme() {
-  const { theme, toggleTheme } = useColorScheme();
+  const colorScheme = useColorScheme(); // returns 'light' | 'dark'
+  const theme = colorScheme === 'dark' ? 'dark' : 'light';
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <NavigationThemeProvider
         value={theme === 'dark' ? NavigationDarkTheme : NavigationDefaultTheme}
       >
-        <Stack
-          screenOptions={{
-            headerShown: true,
-            headerRight: () => (
-              <View style={styles.toggleButton}>
-                <Switch
-                  value={theme === 'dark'}
-                  onValueChange={toggleTheme}
-                  thumbColor={theme === 'dark' ? '#f5dd4b' : '#f4f3f4'}
-                  trackColor={{ false: '#767577', true: '#81b0ff' }}
-                />
-              </View>
-            ),
-          }}
-        >
+        <Stack screenOptions={{}}>
           <Stack.Screen name="(tabs)" options={{ headerShown: true }} />
           <Stack.Screen name="+not-found" />
         </Stack>
