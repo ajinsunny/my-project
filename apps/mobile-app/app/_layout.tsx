@@ -9,9 +9,11 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { View, StyleSheet, Switch } from 'react-native';
+import { useColorScheme } from 'react-native';
 
 import { AppThemeProvider } from '@/contexts/ThemeContext';
-import { useColorScheme } from 'react-native';
+import { SavingsProvider } from '@/contexts/SavingsContext';
+
 
 SplashScreen.preventAutoHideAsync();
 
@@ -32,7 +34,9 @@ export default function RootLayout() {
 
   return (
     <AppThemeProvider>
-      <RootLayoutWithTheme />
+      <SavingsProvider>
+        <RootLayoutWithTheme />
+      </SavingsProvider>
     </AppThemeProvider>
   );
 }

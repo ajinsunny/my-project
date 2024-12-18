@@ -85,7 +85,10 @@ export default function HomeScreen() {
   const handleDeleteGoal = async (id: string) => {
     const updatedGoals = savingsGoals.filter((g) => g.id !== id);
     setSavingsGoals(updatedGoals);
+  
+    // Save updated empty goals list to AsyncStorage
     await saveGoalsToStorage(updatedGoals);
+    console.log('Goals after deletion:', updatedGoals); // Debug log
   };
 
   const validateGoalInput = (): boolean => {
@@ -110,21 +113,19 @@ export default function HomeScreen() {
 
   const canAffordGoal = (
     goals: Goal[],
-    income: number,
     newGoal: Goal,
     isEditing = false
   ): boolean => {
-    // Calculate monthly needed for new/edited goal
+    const income = monthlyIncome; // Use latest income from context
     const monthlyNeededForNewGoal = newGoal.targetAmount / newGoal.timeFrame;
-
-    // Exclude the edited goal if we are editing so we don't count it twice
+  
     const otherGoals = isEditing
       ? goals.filter((g) => g.id !== newGoal.id)
       : goals;
-
+  
     const sumOfOthers = getTotalMonthlySavings(otherGoals);
     const leftover = income - sumOfOthers;
-
+  
     if (monthlyNeededForNewGoal > leftover) {
       Alert.alert(
         'You cannot afford it!',
@@ -132,25 +133,9 @@ export default function HomeScreen() {
       );
       return false;
     }
-
-    // Also check total monthly savings after adding the new goal
-    const updatedGoals = recalculateSuggestedSavings([...otherGoals, newGoal]);
-    const totalMonthlySavings = getTotalMonthlySavings(updatedGoals);
-
-    if (income < totalMonthlySavings) {
-      Alert.alert(
-        'Insufficient Income',
-        `Your monthly income ($${income.toFixed(
-          2
-        )}) is lower than the required monthly savings ($${totalMonthlySavings.toFixed(
-          2
-        )}) for all goals. Please adjust.`
-      );
-      return false;
-    }
-
     return true;
   };
+  
 
   const handleAddGoal = async () => {
     if (!validateGoalInput()) return;

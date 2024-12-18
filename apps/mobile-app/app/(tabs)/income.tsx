@@ -10,60 +10,36 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSavings } from '@/contexts/SavingsContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { STORAGE_KEYS } from '@/constants/storageKeys';
-
-interface Goal {
-  id: string;
-  goal: string;
-  progress: number;
-  targetAmount: number;
-  timeFrame: number;
-  suggestedSavings?: number;
-}
 
 export default function IncomeScreen() {
-  const [monthlyIncome, setMonthlyIncome] = useState<string>('');
-  const [goals, setGoals] = useState<Goal[]>([]);
+  const { monthlyIncome, setMonthlyIncome, savingsGoals } = useSavings();
+  const [inputIncome, setInputIncome] = useState<string>(monthlyIncome.toString());
   const { theme } = useColorScheme();
 
   useEffect(() => {
-    const loadData = async () => {
-      const storedIncome = await AsyncStorage.getItem(
-        STORAGE_KEYS.MONTHLY_INCOME
-      );
-      if (storedIncome) {
-        setMonthlyIncome(storedIncome);
-      }
-
-      const storedGoals = await AsyncStorage.getItem(
-        STORAGE_KEYS.SAVINGS_GOALS
-      );
-      if (storedGoals) {
-        setGoals(JSON.parse(storedGoals));
-      }
-    };
-    loadData();
-  }, []);
+    setInputIncome(monthlyIncome.toString()); // Sync input field with context
+  }, [monthlyIncome]);
 
   const getTotalMonthlySavings = () => {
-    return goals.reduce((sum, g) => {
+    return savingsGoals.reduce((sum, g) => {
       const savings =
         g.targetAmount && g.timeFrame ? g.targetAmount / g.timeFrame : 0;
       return sum + savings;
     }, 0);
   };
 
-  const saveMonthlyIncome = async () => {
-    const incomeNum = parseFloat(monthlyIncome);
+  const saveMonthlyIncome = () => {
+    const incomeNum = parseFloat(inputIncome);
+    const totalMonthlySavings = getTotalMonthlySavings();
+
     if (isNaN(incomeNum) || incomeNum <= 0) {
       Alert.alert('Error', 'Please enter a valid positive income.');
       return;
     }
 
-    const totalMonthlySavings = getTotalMonthlySavings();
     if (incomeNum < totalMonthlySavings) {
       Alert.alert(
         'Insufficient Income',
@@ -76,10 +52,7 @@ export default function IncomeScreen() {
       return;
     }
 
-    await AsyncStorage.setItem(
-      STORAGE_KEYS.MONTHLY_INCOME,
-      incomeNum.toString()
-    );
+    setMonthlyIncome(incomeNum); // Update context immediately
     Alert.alert('Success', 'Monthly income updated successfully!');
     Keyboard.dismiss();
   };
@@ -95,8 +68,8 @@ export default function IncomeScreen() {
       <TextInput
         placeholder="Monthly Income"
         placeholderTextColor={Colors[theme].inputBorder}
-        value={monthlyIncome}
-        onChangeText={setMonthlyIncome}
+        value={inputIncome}
+        onChangeText={setInputIncome}
         keyboardType="numeric"
         style={[
           styles.input,
